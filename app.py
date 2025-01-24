@@ -78,20 +78,35 @@ def register_meal():
 @login_required
 def edit_meal(meal_id):
     data = request.json
-    meal = Meal.query.get(meal_id)
+    current_meal = Meal.query.get(meal_id)
 
-    if meal:
-        meal.user_id = current_user.id
-        meal.name = data.get("name")
-        meal.description = data.get("description")
-        meal.date = lambda: datetime.now(timezone.utc)
-        meal.is_in_diet = data.get("is_in_diet")
+    if current_meal.user_id != current_user.id:
+        return jsonify({"message": "Você não possui permissão para editar essa refeição"}), 403
+
+    if current_meal:
+        current_meal.name = data.get("name")
+        current_meal.description = data.get("description")
+        current_meal.is_in_diet = data.get("is_in_diet")
         db.session.commit()
         return jsonify({"message": f"Refeição atualizada com sucesso"})
     
     return jsonify({"message": "Refeição não encontrada"}), 404
 
 # Delete a meal
+@app.route("/meal/<int:meal_id>", methods=['DELETE'])
+@login_required
+def delete_meal(meal_id):
+    meal = Meal.query.get(meal_id)
+
+    if meal.user_id!= current_user.id:
+        return jsonify({"message": "Você não possui permissão para excluir essa refeição"}), 403
+    
+    if meal:
+        db.session.delete(meal)
+        db.session.commit()
+        return jsonify({"message": "Refeição excluída com sucesso"})
+
+    return jsonify({"message": "Refeição não encontrada"}), 404
 
 # List all user meals
 
