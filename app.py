@@ -55,8 +55,21 @@ def create_user():
     return jsonify({"message": "Preencha corretamente os dados"}), 400
 
 # Register a meal
+@app.route("/meal", methods=['POST'])
+def register_meal():
+    data = request.json
+    name = data.get('name')
+    description = data.get('description')
+    date = data.get('date')
+    is_in_diet = data.get('is_in_diet')
 
-
+    if name and description and date and is_in_diet:
+        new_meal = Meal(name=name, description=description, date=date, is_in_diet=is_in_diet)
+        db.session.add(new_meal)
+        db.session.commit()
+        return jsonify({"message": "Refeição cadastrada com sucesso"})
+    
+    return jsonify({"message": "Preencha corretamente os dados"}), 400
 # Edit a meal
 
 # Delete a meal
