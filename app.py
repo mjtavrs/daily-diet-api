@@ -70,6 +70,7 @@ def register_meal():
         return jsonify({"message": "Refeição cadastrada com sucesso"})
     
     return jsonify({"message": "Preencha corretamente os dados"}), 400
+
 # Edit a meal
 
 # Delete a meal
