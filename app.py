@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 from models.user import User
 from models.meal import Meal
 from database import db
-from flask_login import LoginManager, login_user, current_user, logout_user
+from datetime import datetime, timezone
+from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 import bcrypt
 
 app = Flask(__name__)
@@ -56,15 +57,16 @@ def create_user():
 
 # Register a meal
 @app.route("/meal", methods=['POST'])
+@login_required
 def register_meal():
     data = request.json
+    user_id = current_user.id
     name = data.get('name')
     description = data.get('description')
-    date = data.get('date')
     is_in_diet = data.get('is_in_diet')
 
-    if name and description and date and is_in_diet:
-        new_meal = Meal(name=name, description=description, date=date, is_in_diet=is_in_diet)
+    if name and description:
+        new_meal = Meal(user_id=user_id, name=name, description=description, is_in_diet=is_in_diet)
         db.session.add(new_meal)
         db.session.commit()
         return jsonify({"message": "Refeição cadastrada com sucesso"})
@@ -72,6 +74,22 @@ def register_meal():
     return jsonify({"message": "Preencha corretamente os dados"}), 400
 
 # Edit a meal
+@app.route("/meal/<int:meal_id>", methods=['PUT'])
+@login_required
+def edit_meal(meal_id):
+    data = request.json
+    meal = Meal.query.get(meal_id)
+
+    if meal:
+        meal.user_id = current_user.id
+        meal.name = data.get("name")
+        meal.description = data.get("description")
+        meal.date = lambda: datetime.now(timezone.utc)
+        meal.is_in_diet = data.get("is_in_diet")
+        db.session.commit()
+        return jsonify({"message": f"Refeição atualizada com sucesso"})
+    
+    return jsonify({"message": "Refeição não encontrada"}), 404
 
 # Delete a meal
 
