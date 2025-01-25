@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from models.user import User
 from models.meal import Meal
 from database import db
-from datetime import datetime, timezone
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 import bcrypt
 
@@ -124,10 +123,6 @@ def get_meal(meal_id):
         return jsonify(meal.to_dict())
     
     return jsonify({"message": "Refeição não encontrada"}), 404
-
-@app.route('/', methods=['GET'])
-def hello_world():
-    return 'Hello World!'
 
 if __name__ == '__main__':
     app.run(debug=True)
