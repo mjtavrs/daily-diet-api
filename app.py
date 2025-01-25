@@ -109,6 +109,11 @@ def delete_meal(meal_id):
     return jsonify({"message": "Refeição não encontrada"}), 404
 
 # List all user meals
+@app.route('/meal/<int:user_id>', methods=['GET'])
+def list_user_meals(user_id):
+    meals = Meal.query.filter_by(user_id=user_id).all()
+
+    return jsonify([meal.to_dict() for meal in meals])
 
 # List a specific meal
 
